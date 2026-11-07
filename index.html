@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ASローマ 26/27 中間アンケート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#8e1f2f; --accent-tint:#f8eef0; --gold:#c9962e;
+  --bg:#f4f1ec; --card:#fff; --text:#2b2324; --muted:#7b7070; --line:#e7e0d8; --field:#faf8f5; --err:#b3261e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:"Noto Sans JP",system-ui,sans-serif;font-size:15px;line-height:1.65;min-height:100vh}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:600px;margin:0 auto;padding:0 16px 56px}
+
+header.top{padding:32px 2px 18px}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--accent)}
+header.top h1{font-size:clamp(19px,5.6vw,24px);font-weight:700;line-height:1.35;margin:6px 0 10px}
+header.top p{color:var(--muted);font-size:14px}
+
+.steps{list-style:none;display:flex;align-items:center;gap:8px;margin:0 0 22px;font-size:13px;color:var(--muted)}
+.steps li{display:flex;align-items:center;gap:6px}
+.steps li + li::before{content:"";width:28px;height:1px;background:var(--line);margin-right:2px}
+.steps b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:700}
+.steps li.on{color:var(--text);font-weight:700}
+.steps li.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps li.done b{background:var(--accent-tint);border-color:var(--accent-tint);color:var(--accent)}
+
+h2.sec{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin:4px 2px 10px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:14px;position:relative}
+.q-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.qn{font-size:13px;color:var(--accent);font-weight:700;margin-right:8px}
+.req{display:inline-block;vertical-align:2px;margin-left:8px;font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-tint);padding:0 7px;border-radius:4px;line-height:20px}
+.q-desc{color:var(--muted);font-size:13px;margin-bottom:14px}
+.q.invalid{border-color:var(--err);box-shadow:inset 3px 0 0 var(--err)}
+.q .msg{display:none;color:var(--err);font-size:13px;margin-top:12px}
+.q.invalid .msg{display:block}
+.q .msg::before{content:"※ "}
+
+select{font:inherit;font-size:15px;color:var(--text);padding:10px 36px 10px 12px;border:1px solid var(--line);border-radius:8px;
+  background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237b7070' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 13px center;
+  -webkit-appearance:none;appearance:none;width:100%}
+select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.rank-row{display:grid;grid-template-columns:3em 1fr;align-items:center;gap:10px;margin-bottom:8px}
+.rank-row span{font-weight:700;color:var(--accent);font-size:14px}
+
+.formation{display:block;width:100%;max-width:280px;margin:4px auto 18px;border-radius:10px}
+.lu-row{display:grid;grid-template-columns:6.2em 1fr;align-items:center;gap:10px;padding:4px 0}
+.lu-row label{font-size:14px;font-weight:500}
+
+.opt{display:flex;align-items:center;gap:12px;padding:11px 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--field)}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-tint);font-weight:500}
+#needs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.chip{position:relative;display:block;text-align:center;padding:8px 2px;border:1px solid var(--line);border-radius:8px;background:var(--field);font-size:13px;cursor:pointer;white-space:nowrap}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip:has(input:checked){border-color:var(--accent);background:var(--accent);color:#fff;font-weight:700}
+.chip:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+input[type=radio]{width:18px;height:18px;accent-color:var(--accent);margin:0;flex-shrink:0;cursor:pointer}
+.grid{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.grid th:first-child{width:27%}
+.grid th{font-weight:500;color:var(--muted);padding:4px 1px 10px;font-size:11px;line-height:1.3;vertical-align:bottom}
+.grid td{text-align:center;padding:13px 1px;border-top:1px solid var(--line)}
+.grid td:first-child{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid tr.invalid td:first-child{color:var(--err)}
+.grid-scroll{overflow-x:auto}
+
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 8px}
+.btn{padding:12px 28px;border-radius:10px;font-weight:700;font-size:15px;border:none;background:var(--accent);color:#fff}
+.btn.flat{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:500}
+.btn:disabled{opacity:.5;cursor:default}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+.foot a{color:var(--muted)}
+.foot a.ghost-link{color:#ddd5ca;text-decoration:none;font-size:11px}
+.foot a.ghost-link:hover{color:var(--muted)}
+.demo{background:#fdf6e3;border:1px solid #efdca8;color:#7a5b00;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:16px}
+.thanks{text-align:center;padding:36px 20px}
+.thanks h2{font-size:19px;margin-bottom:6px}
+.thanks p{color:var(--muted);font-size:14px}
+
+/* results (admin / public) */
+.stat{display:flex;gap:28px;margin:12px 0 16px}
+.stat small{display:block;color:var(--muted);font-size:12px}
+.stat b{font-size:24px}
+.open{color:#2e7d4f}.closed{color:var(--err)}
+.adminbar{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:14px}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.res h2{font-size:16px;margin-bottom:4px}
+.bar{display:grid;grid-template-columns:7.3em 1fr 6.2em;gap:8px;align-items:center;font-size:13px;margin-bottom:6px}
+.bar .t{height:14px;background:#f1ece6;border-radius:3px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--accent);opacity:.6}
+.bar.top .t i{opacity:1}
+.bar .v{text-align:right;white-space:nowrap;color:var(--muted);font-size:12px}
+.pos-block{margin-top:16px}
+.pos-block h3{font-size:14px;font-weight:700;margin-bottom:6px}
+table.res-t{width:100%;border-collapse:collapse;font-size:13px}
+table.res-t th,table.res-t td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:center}
+table.res-t th{color:var(--muted);font-weight:500;font-size:12px}
+table.res-t .l{text-align:left}
+.stack{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:4px 0 2px}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin:8px 0 12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.nc-row{margin-bottom:14px;font-size:13px}
+.nc-row .h{display:flex;justify-content:space-between;font-weight:500}
+.nc-row .d{font-size:11px;color:var(--muted)}
+.pw-row{display:flex;gap:8px}
+.pw-row input{flex:1;min-width:0;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--text)}
+.pw-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.pw-err{color:var(--err);font-size:13px;margin-top:8px;min-height:1.2em}
+.uid{font-family:monospace;font-size:12px;background:var(--field);padding:8px;border-radius:6px;word-break:break-all;margin:8px 0;user-select:all}
+.hidden{display:none!important}
+.page{display:none}.page.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="demoBanner" class="demo hidden">デモモード：Firebase未設定のため、回答はこのブラウザ内だけに保存されます</div>
+
+  <header class="top">
+    <h1>ASローマ 26/27 中間アンケート</h1>
+  </header>
+
+  <ol class="steps hidden" id="reqNote">
+    <li data-s="1"><b>1</b>ベストメンバー</li>
+    <li data-s="2"><b>2</b>アンケート</li>
+  </ol>
+
+  <div id="loading" class="card" style="color:var(--muted)">読み込み中…</div>
+
+  <!-- PAGE 1 -->
+  <div class="page" id="p1">
+    <h2 class="sec">STEP 1　ベストメンバー（3-4-2-1）</h2>
+    <div class="card q" id="q-lineup">
+      <div class="q-title">ベストメンバーを選んでください<span class="req">必須</span></div>
+      <div class="q-desc">システムは3-4-2-1とします。</div>
+      <svg class="formation" viewBox="0 0 300 300" role="img" aria-label="3-4-2-1のポジション配置図">
+        <rect x="0" y="0" width="300" height="300" rx="10" fill="#eef3ec"/>
+        <line x1="0" y1="150" x2="300" y2="150" stroke="#d4dfd0"/><circle cx="150" cy="150" r="32" fill="none" stroke="#d4dfd0"/>
+        <rect x="80" y="0" width="140" height="44" fill="none" stroke="#d4dfd0"/><rect x="80" y="256" width="140" height="44" fill="none" stroke="#d4dfd0"/>
+        <g font-size="11" text-anchor="middle" fill="#2b2324" font-family="'Noto Sans JP',sans-serif">
+          <g id="fm"></g>
+        </g>
+      </svg>
+      <div id="lineupRows"></div>
+      <div class="msg">11人すべてを選んでください</div>
+    </div>
+    <div class="nav">
+      <span></span>
+      <button class="btn" id="next">次へ</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page" id="p2">
+    <h2 class="sec">STEP 2　アンケート</h2>
+    <div class="card q" id="q-top5">
+      <div class="q-title"><span class="qn">Q1</span>今季ここまでのトッププレーヤーは？<span class="req">必須</span></div>
+      <div id="top5"></div>
+      <div class="msg">1位〜5位をすべて選んでください</div>
+    </div>
+    <div class="card q" id="q-need">
+      <div class="q-title"><span class="qn">Q2</span>最大の補強ポイントは？<span class="req">必須</span></div>
+      <div id="needs" style="margin-top:12px"></div>
+      <div class="msg">1つ選んでください</div>
+    </div>
+    <div class="card q" id="q-new">
+      <div class="q-title"><span class="qn">Q3</span>新加入選手の序盤評価<span class="req">必須</span></div>
+      <div class="grid-scroll"><table class="grid" id="ncGrid"></table></div>
+      <div class="msg">未評価の選手がいます</div>
+    </div>
+    <div class="nav">
+      <button class="btn flat" id="back">戻る</button>
+      <button class="btn" id="submit">投票する</button>
+    </div>
+    <div id="sendErr" style="color:var(--err);font-size:13px"></div>
+  </div>
+
+  <!-- DONE -->
+  <div class="page" id="pDone">
+    <div class="card thanks">
+      <h2>投票ありがとうございました</h2>
+      <p id="doneMsg">投票結果をお楽しみに。</p>
+      <button class="btn flat demo-reset hidden" style="margin-top:18px">もう一度投票する（デモ用）</button>
+    </div>
+  </div>
+
+  <!-- CLOSED -->
+  <div class="page" id="pClosed">
+    <div class="card thanks">
+      <h2 id="closedTitle">投票は締め切りました</h2>
+      <p id="closedMsg">たくさんのご投票ありがとうございました。</p>
+      <button class="btn flat demo-reset hidden" style="margin-top:18px">受付を再開して投票する（デモ用）</button>
+    </div>
+  </div>
+
+  <!-- PUBLIC RESULTS -->
+  <div class="page" id="pPublic"><div id="publicResults"></div></div>
+
+  <!-- ADMIN -->
+  <div class="page" id="pAdmin">
+    <div class="card">
+      <div class="q-title">管理者画面</div>
+      <div id="adminLogin">
+        <p class="q-desc">パスワードを入力してください。</p>
+        <input type="text" name="username" autocomplete="username" value="admin" hidden>
+        <div class="pw-row">
+          <input type="password" id="pw" autocomplete="current-password" placeholder="パスワード" required>
+          <button class="btn" id="loginBtn" type="button">ログイン</button>
+        </div>
+        <div id="pwErr" class="pw-err"></div>
+      </div>
+      <div id="adminPanel" class="hidden">
+        <div class="stat">
+          <div><small>受付状態</small><b id="aStatus">-</b></div>
+          <div><small>投票数</small><b id="aTotal">-</b></div>
+        </div>
+        <div class="adminbar">
+          <button class="btn" id="openBtn">投票を受け付ける</button>
+          <button class="btn" id="closeBtn">投票を締め切る</button>
+          <button class="btn flat" id="reloadBtn">更新</button>
+          <button class="btn flat hidden" id="demoSeedBtn">デモ票を30件追加</button>
+          <button class="btn flat hidden" id="demoClearBtn">デモ票を全削除</button>
+          <button class="btn flat" id="logoutBtn">ログアウト</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="showRes"> 結果を公開する（締切後、投票ページに集計を表示）</label>
+      </div>
+    </div>
+    <div id="adminResults"></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script type="module">
+/* ============ 設定（ここだけ書き換え） ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBYl5Xja589zOVIY2EKKWUzJb5ePJ7907Q",
+  authDomain: "roma-ratings-202526-osho.firebaseapp.com",
+  projectId: "roma-ratings-202526-osho",
+  storageBucket: "roma-ratings-202526-osho.firebasestorage.app",
+  messagingSenderId: "132193634526",
+  appId: "1:132193634526:web:7e2aca801380e904075a4f",
+  measurementId: "G-61E6CFE8DL"
+};
+// Firebaseコンソールで作った管理者ユーザーのメールアドレスとUID（パスワードはここに書かない）
+const ADMIN_EMAIL = "roma2627-admin@example.com";
+const ADMIN_UID = "9xgRdXntK5fKyBxo2EjDo2sCmTw2";
+const DEMO_PASSWORD = "roma";  // デモモード専用
+const COL_VOTES = "bestxi2627_votes";
+const DOC_STATE = ["bestxi2627_config", "state"];
+/* ================================================== */
+
+const PLAYERS = [
+  {id:"svilar",no:99,n:"スヴィラル",g:"GK"},{id:"gollini",no:95,n:"ゴッリーニ",g:"GK"},{id:"vasquez",no:32,n:"バスケス",g:"GK"},
+  {id:"rensch",no:2,n:"レンシュ",g:"DF"},{id:"koulierakis",no:3,n:"クリエラキス",g:"DF"},
+  {id:"ndicka",no:5,n:"エンディカ",g:"DF"},{id:"molina",no:20,n:"モリーナ",g:"DF"},
+  {id:"hermoso",no:22,n:"エルモソ",g:"DF"},{id:"mancini",no:23,n:"マンチーニ",g:"DF"},
+  {id:"balerdi",no:26,n:"バレルディ",g:"DF"},{id:"wesley",no:43,n:"ウェズレイ",g:"DF"},
+  {id:"lulli",no:77,n:"ルッリ",g:"DF"},{id:"ghilardi",no:87,n:"ギラルディ",g:"DF"},
+  {id:"cristante",no:4,n:"クリスタンテ",g:"MF"},{id:"pellegrini",no:7,n:"ペッレグリーニ",g:"MF"},
+  {id:"deroon",no:15,n:"デ・ローン",g:"MF"},{id:"kone",no:17,n:"コネ",g:"MF"},
+  {id:"pisilli",no:61,n:"ピジッリ",g:"MF"},
+  {id:"castro",no:9,n:"カストロ",g:"FW"},{id:"malen",no:14,n:"マレン",g:"FW"},
+  {id:"soule",no:18,n:"スーレ",g:"FW"},{id:"dybala",no:21,n:"ディバラ",g:"FW"},
+  {id:"mora",no:86,n:"モラ",g:"FW"},
+];
+const P = Object.fromEntries(PLAYERS.map(p=>[p.id,p]));
+// 配置図の座標（上が攻撃方向）
+// CMFは左右を区別しない（データ上の枠はCML/CMRの2つ、集計ではまとめて「CMF」）
+const SLOTS = [
+  {id:"GK", label:"GK",       x:150,y:284},
+  {id:"CBL",label:"左CB",     x:72, y:232},{id:"CBC",label:"中央CB",x:150,y:240},{id:"CBR",label:"右CB",x:228,y:232},
+  {id:"LWB",label:"左WB",     x:42, y:150},{id:"CML",label:"CMF",   x:110,y:178},{id:"CMR",label:"CMF",x:190,y:178},{id:"RWB",label:"右WB",x:258,y:150},
+  {id:"SHL",label:"左シャドー",x:100,y:96},{id:"SHR",label:"右シャドー",x:200,y:96},
+  {id:"CF", label:"CF",       x:150,y:38},
+];
+const SLOT_ORDER = SLOTS.map(s=>s.id);
+const POS_GROUPS = [
+  {n:"GK",slots:["GK"]},{n:"左CB",slots:["CBL"]},{n:"中央CB",slots:["CBC"]},{n:"右CB",slots:["CBR"]},
+  {n:"左WB",slots:["LWB"]},{n:"CMF",slots:["CML","CMR"]},{n:"右WB",slots:["RWB"]},
+  {n:"左シャドー",slots:["SHL"]},{n:"右シャドー",slots:["SHR"]},{n:"CF",slots:["CF"]},
+];
+const NEEDS = [{id:"GK",n:"GK"},{id:"CB",n:"CB"},{id:"LWB",n:"左WB"},{id:"RWB",n:"右WB"},{id:"CMF",n:"CMF"},{id:"LSH",n:"左シャドー"},{id:"RSH",n:"右シャドー"},{id:"CF",n:"CF"}];
+const NEWCOMERS = ["koulierakis","molina","balerdi","deroon","mora","castro"];
+const GRADES = [{v:5,n:"大アタリ",c:"#2e7d4f"},{v:4,n:"アタリ",c:"#8cc49c"},{v:3,n:"及第点",c:"#c9c4bd"},{v:2,n:"微妙",c:"#e39a9a"},{v:1,n:"がっかり",c:"#b3261e"}];
+
+const $ = s => document.querySelector(s);
+const isAdminPage = new URLSearchParams(location.search).has("admin") || location.hash === "#admin";
+const DEMO = firebaseConfig.apiKey.startsWith("YOUR");
+
+/* ---------- データ層 ---------- */
+let store;
+if (DEMO) {
+  const K = "bestxi2627_demo_form";
+  const init = () => ({state:{open:true,showResults:false},votes:{}});
+  // ブラウザ保存が使えない環境（プレビュー表示など）では、開いている間だけメモリに保持
+  let mem = null, memAdmin = false;
+  const load = () => { try { const s = localStorage.getItem(K); if (s) return JSON.parse(s) } catch {} return mem || (mem = init()) };
+  const save = d => { mem = d; try { localStorage.setItem(K, JSON.stringify(d)) } catch {} };
+  store = {
+    async getState(){ return load().state },
+    async setState(p){ const d=load(); Object.assign(d.state,p); save(d) },
+    async hasVoted(){ return !!load().votes.me },
+    async submit(v){ const d=load(); if(!d.state.open) throw new Error("closed"); d.votes.me=v; save(d) },
+    async getVotes(){ return Object.values(load().votes) },
+    async adminCurrent(){ if (memAdmin) return true; try { return sessionStorage.getItem("bestxi_demo_admin")==="1" } catch { return false } },
+    async adminLogin(pw){ if (pw !== DEMO_PASSWORD) throw {code:"auth/wrong-password"}; memAdmin = true; try { sessionStorage.setItem("bestxi_demo_admin","1") } catch {} },
+    async adminLogout(){ memAdmin = false; try { sessionStorage.removeItem("bestxi_demo_admin") } catch {} },
+    async seed(n){ const d=load(); for(let i=0;i<n;i++) d.votes["r"+Date.now()+i]=randomVote(); save(d) },
+    async clear(){ const d=load(); d.votes={}; save(d) },
+    async resetMe(){ const d=load(); delete d.votes.me; d.state.open=true; save(d) },
+  };
+} else {
+  const V = "10.12.2";
+  const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+  const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const au = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const app = initializeApp(firebaseConfig);
+  const db = fs.getFirestore(app), auth = au.getAuth(app);
+  const stateRef = fs.doc(db, ...DOC_STATE);
+  const ready = new Promise(r => { const u = au.onAuthStateChanged(auth, x => { u(); r(x) }) });
+  async function anon(){ await ready; return auth.currentUser || (await au.signInAnonymously(auth)).user }
+  store = {
+    async getState(){ const s = await fs.getDoc(stateRef); return s.exists() ? s.data() : null },
+    async setState(p){ await fs.setDoc(stateRef, p, {merge:true}) },
+    async hasVoted(){
+      try { if (localStorage.getItem("bestxi2627_voted")) return true } catch {}
+      const u = await anon(); return (await fs.getDoc(fs.doc(db, COL_VOTES, u.uid))).exists();
+    },
+    async submit(v){
+      const u = await anon();
+      await fs.setDoc(fs.doc(db, COL_VOTES, u.uid), {...v, createdAt: fs.serverTimestamp()});
+      try { localStorage.setItem("bestxi2627_voted","1") } catch {}
+    },
+    async getVotes(){ return (await fs.getDocs(fs.collection(db, COL_VOTES))).docs.map(d=>d.data()) },
+    async adminCurrent(){ await ready; return !!auth.currentUser && auth.currentUser.uid === ADMIN_UID },
+    async adminLogin(pw){
+      const u = (await au.signInWithEmailAndPassword(auth, ADMIN_EMAIL, pw)).user;
+      if (u.uid !== ADMIN_UID) { await au.signOut(auth); throw {code:"not-admin"} }
+    },
+    async adminLogout(){ await au.signOut(auth) },
+  };
+}
+
+function show(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("on", p.id===id));
+  $("#loading").classList.add("hidden");
+  $("#reqNote").classList.toggle("hidden", !(id==="p1"||id==="p2"));
+  document.querySelectorAll("#reqNote li").forEach(li=>{
+    li.classList.toggle("on", (id==="p1"&&li.dataset.s==="1")||(id==="p2"&&li.dataset.s==="2"));
+    li.classList.toggle("done", id==="p2"&&li.dataset.s==="1");
+  });
+  window.scrollTo(0,0);
+}
+const optionsHtml = (ph="選手を選ぶ") => `<option value="">${ph}</option>` + ["GK","DF","MF","FW"].map(g=>`<optgroup label="${g}">`+PLAYERS.filter(p=>p.g===g).map(p=>`<option value="${p.id}">${p.n}</option>`).join("")+`</optgroup>`).join("");
+
+/* ---------- ページ1 ---------- */
+const lineup = {};
+function renderFormation(){
+  $("#fm").innerHTML = SLOTS.map(s=>{
+    const p = P[lineup[s.id]];
+    if (!p) return `<rect x="${s.x-38}" y="${s.y-11}" width="76" height="22" rx="6" fill="#fff" stroke="#d9cfc4"/><text x="${s.x}" y="${s.y+4}" fill="#7b7070">${s.label}</text>`;
+    return `<text x="${s.x}" y="${s.y-15}" font-size="8.5" fill="#7b7070">${s.label}</text>`+
+      `<rect x="${s.x-38}" y="${s.y-11}" width="76" height="22" rx="6" fill="#8e1f2f"/>`+
+      `<text x="${s.x}" y="${s.y+4}" fill="#fff" font-weight="700" font-size="${p.n.length>6?9.5:10.5}">${p.n}</text>`;
+  }).join("");
+}
+renderFormation();
+const rows = $("#lineupRows");
+for (const s of SLOTS) {
+  const r = document.createElement("div"); r.className = "lu-row";
+  r.innerHTML = `<label for="lu-${s.id}">${s.label}</label><select id="lu-${s.id}" data-slot="${s.id}">${optionsHtml()}</select>`;
+  rows.appendChild(r);
+}
+rows.addEventListener("change", e => {
+  const sel = e.target; if (!sel.dataset.slot) return;
+  if (sel.value) lineup[sel.dataset.slot] = sel.value; else delete lineup[sel.dataset.slot];
+  syncDisabled("#lineupRows select", () => Object.entries(lineup), s => s.dataset.slot);
+  renderFormation();
+  if (Object.keys(lineup).length === 11) $("#q-lineup").classList.remove("invalid");
+});
+function syncDisabled(selector, pairs, keyOf){
+  document.querySelectorAll(selector).forEach(sel=>{
+    const me = keyOf(sel), taken = new Set(pairs().filter(([k,v])=>k!==me && v).map(([,v])=>v));
+    sel.querySelectorAll("option[value]").forEach(o=>{ if (o.value) o.disabled = taken.has(o.value) });
+  });
+}
+$("#next").onclick = () => {
+  if (Object.keys(lineup).length !== 11) { $("#q-lineup").classList.add("invalid"); $("#q-lineup").scrollIntoView({behavior:"smooth",block:"center"}); return }
+  show("p2");
+};
+
+/* ---------- ページ2 ---------- */
+const answers = { top5:[null,null,null,null,null], need:null, newcomers:{} };
+const t5 = $("#top5");
+for (let i=0;i<5;i++){
+  const r = document.createElement("div"); r.className="rank-row";
+  r.innerHTML = `<span>${i+1}位</span><select data-i="${i}">${optionsHtml()}</select>`;
+  t5.appendChild(r);
+}
+t5.addEventListener("change", e => {
+  const i = +e.target.dataset.i; answers.top5[i] = e.target.value || null;
+  syncDisabled("#top5 select", () => answers.top5.map((v,j)=>[String(j),v]), s => s.dataset.i);
+  if (answers.top5.every(Boolean)) $("#q-top5").classList.remove("invalid");
+});
+$("#needs").innerHTML = NEEDS.map(o=>`<label class="chip"><input type="radio" name="need" value="${o.id}"><span>${o.n}</span></label>`).join("");
+$("#needs").addEventListener("change", e => { answers.need = e.target.value; $("#q-need").classList.remove("invalid") });
+$("#ncGrid").innerHTML = `<thead><tr><th></th>${GRADES.map(g=>`<th>${g.n}</th>`).join("")}</tr></thead><tbody>` +
+  NEWCOMERS.map(id=>`<tr data-id="${id}"><td>${P[id].n}</td>${GRADES.map(g=>`<td><input type="radio" name="nc-${id}" value="${g.v}" aria-label="${P[id].n}：${g.n}"></td>`).join("")}</tr>`).join("") + `</tbody>`;
+$("#ncGrid").addEventListener("change", e => {
+  const tr = e.target.closest("tr"); answers.newcomers[tr.dataset.id] = +e.target.value; tr.classList.remove("invalid");
+  if (NEWCOMERS.every(id=>answers.newcomers[id])) $("#q-new").classList.remove("invalid");
+});
+$("#back").onclick = () => show("p1");
+$("#submit").onclick = async () => {
+  let first = null;
+  const mark = (id, bad) => { $(id).classList.toggle("invalid", bad); if (bad && !first) first = $(id) };
+  mark("#q-top5", !answers.top5.every(Boolean));
+  mark("#q-need", !answers.need);
+  const missing = NEWCOMERS.filter(id=>!answers.newcomers[id]);
+  document.querySelectorAll("#ncGrid tbody tr").forEach(tr=>tr.classList.toggle("invalid", missing.includes(tr.dataset.id)));
+  mark("#q-new", missing.length > 0);
+  if (first) { first.scrollIntoView({behavior:"smooth",block:"center"}); return }
+  const btn = $("#submit"); btn.disabled = true; $("#sendErr").textContent = "";
+  try {
+    await store.submit({ lineup:{...lineup}, top5:[...answers.top5], need:answers.need, newcomers:{...answers.newcomers} });
+    show("pDone");
+  } catch(e) {
+    console.error(e);
+    const st = await store.getState().catch(()=>null);
+    if (st && !st.open) return showClosed(st);
+    $("#sendErr").textContent = "送信できませんでした。すでに投票済みか、通信エラーの可能性があります。";
+    btn.disabled = false;
+  }
+};
+
+/* ---------- 受付終了 ---------- */
+async function showClosed(st){
+  if (st && st.showResults) {
+    try {
+      $("#publicResults").innerHTML = `<div class="card thanks"><h2>投票結果</h2><p>投票は締め切りました。ご投票ありがとうございました。</p></div>` + renderResults(await store.getVotes());
+      return show("pPublic");
+    } catch(e){ console.error(e) }
+  }
+  if (!st) { $("#closedTitle").textContent = "投票受付前です"; $("#closedMsg").textContent = "受付開始までもうしばらくお待ちください。" }
+  show("pClosed");
+}
+
+/* ---------- 集計 ---------- */
+const pct = (a,b) => (b ? Math.round(a/b*1000)/10 : 0).toFixed(1);
+const bars = (rows, total, topN=1) => { const max = Math.max(1,...rows.map(r=>r.c)); return rows.map((r,i)=>`<div class="bar${i<topN&&r.c?" top":""}"><span>${r.n}</span><span class="t"><i style="width:${r.c/max*100}%"></i></span><span class="v">${r.c}（${pct(r.c,total)}%）</span></div>`).join("") };
+function renderResults(raw){
+  const votes = raw.filter(v=>v && v.lineup), N = votes.length;
+  if (!N) return `<div class="card"><p style="color:var(--muted)">まだ投票がありません</p></div>`;
+  const groupOf = Object.fromEntries(POS_GROUPS.flatMap(g=>g.slots.map(s=>[s,g.n])));
+  const sel = Object.fromEntries(PLAYERS.map(p=>[p.id,0])), pos = Object.fromEntries(POS_GROUPS.map(g=>[g.n,{}]));
+  for (const v of votes){ const seen = new Set();
+    for (const [k,pid] of Object.entries(v.lineup)){ const g = groupOf[k]; if (!P[pid]||!g) continue; pos[g][pid]=(pos[g][pid]||0)+1; if(!seen.has(pid)){seen.add(pid);sel[pid]++} } }
+  let h = `<div class="card res"><h2>① 選手ごとの選出率</h2><p class="q-desc">投票者${N}人のうち、その選手をベストメンバーに入れた割合</p>${bars(PLAYERS.map(p=>({n:p.n,c:sel[p.id]})).sort((a,b)=>b.c-a.c), N, 11)}</div>`;
+  h += `<div class="card res"><h2>② ポジション別の配置</h2>`;
+  for (const g of POS_GROUPS){
+    const rs = Object.entries(pos[g.n]).map(([pid,c])=>({n:P[pid].n,c})).sort((a,b)=>b.c-a.c);
+    h += `<div class="pos-block"><h3>${g.n}${g.slots.length>1?`（${g.slots.length}枠）`:""}</h3>${bars(rs,N)}</div>`;
+  }
+  h += `</div>`;
+  const t = {};
+  votes.forEach(v=>(v.top5||[]).forEach((pid,i)=>{ if(!P[pid]||i>4) return; t[pid] ??= {pts:0,r:[0,0,0,0,0]}; t[pid].pts += 5-i; t[pid].r[i]++ }));
+  const tr = Object.entries(t).sort((a,b)=>b[1].pts-a[1].pts || b[1].r[0]-a[1].r[0]);
+  h += `<div class="card res"><h2>今季ここまでのトッププレーヤー</h2><p class="q-desc">1位=5点〜5位=1点で集計</p>
+    <table class="res-t"><tr><th>順位</th><th class="l">選手</th><th>得点</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th><th>5位</th></tr>
+    ${tr.map(([pid,d],i)=>`<tr><td>${i+1}</td><td class="l">${P[pid].n}</td><td>${d.pts}</td>${d.r.map(x=>`<td>${x||"-"}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  const nd = Object.fromEntries(NEEDS.map(o=>[o.id,0])); votes.forEach(v=>{ if (v.need in nd) nd[v.need]++ });
+  h += `<div class="card res"><h2>最大の補強ポイント</h2>${bars(NEEDS.map(o=>({n:o.n,c:nd[o.id]})).sort((a,b)=>b.c-a.c), N)}</div>`;
+  h += `<div class="card res"><h2>新加入選手の序盤評価</h2><div class="legend">${GRADES.map(g=>`<span><i style="background:${g.c}"></i>${g.n}</span>`).join("")}</div>`;
+  NEWCOMERS.map(id=>{ const c={5:0,4:0,3:0,2:0,1:0}; let s=0,n=0; votes.forEach(v=>{ const g=v.newcomers?.[id]; if(c[g]!==undefined){c[g]++;s+=g;n++} }); return {id,c,n,avg:n?s/n:0} })
+    .sort((a,b)=>b.avg-a.avg || b.c[5]-a.c[5] || (b.c[5]+b.c[4])-(a.c[5]+a.c[4]))  // 平均点（大アタリ5〜がっかり1）の高い順。同点なら大アタリ、次に大アタリ＋アタリの多い順
+    .forEach(r=>{
+      h += `<div class="nc-row"><div class="h"><span>${P[r.id].n}</span></div>
+        <div class="stack">${GRADES.map(g=>`<i style="background:${g.c};width:${r.n?r.c[g.v]/r.n*100:0}%"></i>`).join("")}</div>
+        <div class="d">${GRADES.map(g=>`${g.n} ${r.c[g.v]}`).join(" / ")}</div></div>`;
+    });
+  return h + `</div>`;
+}
+
+/* ---------- デモ用 ---------- */
+function randomVote(){
+  const pick = a => a[Math.floor(Math.random()*a.length)], used = new Set(), lu = {};
+  const pref = {GK:["svilar","svilar","svilar","gollini","vasquez"],CBL:["ndicka","hermoso","ghilardi"],CBC:["mancini","balerdi","koulierakis"],CBR:["mancini","koulierakis","balerdi","rensch"],
+    LWB:["wesley","molina","wesley"],RWB:["rensch","molina","lulli"],CML:["kone","kone","cristante","pisilli"],CMR:["cristante","deroon","pisilli","pellegrini"],
+    SHL:["mora","dybala","pellegrini","malen"],SHR:["soule","dybala","soule"],CF:["malen","malen","castro"]};
+  for (const k of SLOT_ORDER){ let p,t=0; do { p=pick(pref[k]) } while (used.has(p) && ++t<10); if (used.has(p)) p = PLAYERS.find(x=>!used.has(x.id)).id; used.add(p); lu[k]=p }
+  const nc = {}; NEWCOMERS.forEach(id=>nc[id]=1+Math.floor(Math.random()*5));
+  return {lineup:lu, top5:["malen","svilar","kone","soule","ndicka","dybala","mancini","wesley","mora"].sort(()=>Math.random()-.5).slice(0,5), need:pick(NEEDS.map(o=>o.id).concat(["CB","CMF","LSH"])), newcomers:nc};
+}
+
+/* ---------- 管理 ---------- */
+async function adminRefresh(){
+  const st = await store.getState() || {open:false,showResults:false};
+  $("#aStatus").textContent = st.open ? "受付中" : "締切"; $("#aStatus").className = st.open ? "open" : "closed";
+  $("#openBtn").classList.toggle("hidden", !!st.open); $("#closeBtn").classList.toggle("hidden", !st.open);
+  $("#showRes").checked = !!st.showResults;
+  const votes = await store.getVotes(); $("#aTotal").textContent = votes.length;
+  $("#adminResults").innerHTML = renderResults(votes);
+}
+async function openAdminPanel(){
+  $("#adminLogin").classList.add("hidden"); $("#adminPanel").classList.remove("hidden");
+  if (DEMO) { $("#demoSeedBtn").classList.remove("hidden"); $("#demoClearBtn").classList.remove("hidden") }
+  try { await adminRefresh() } catch(e){ console.error(e); $("#adminResults").innerHTML = `<div class="card"><p style="color:var(--err)">集計の読み込みに失敗しました（${e.code||e.message}）</p></div>` }
+}
+$("#loginBtn").onclick = () => doLogin();
+$("#pw").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); doLogin() } });
+async function doLogin(){
+  if ($("#loginBtn").disabled) return;
+  const btn = $("#loginBtn"), err = $("#pwErr"); btn.disabled = true; err.textContent = "";
+  try { await store.adminLogin($("#pw").value); $("#pw").value = ""; await openAdminPanel() }
+  catch(e){
+    console.error(e);
+    const c = e.code || "";
+    err.textContent = /wrong-password|invalid-credential|invalid-login|not-admin|user-not-found/.test(c) ? "パスワードが違います"
+      : c.includes("too-many-requests") ? "試行回数が多すぎます。しばらくしてからお試しください"
+      : "ログインに失敗しました（" + (c||e.message) + "）";
+  }
+  btn.disabled = false;
+};
+$("#logoutBtn").onclick = async () => {
+  await store.adminLogout();
+  $("#adminPanel").classList.add("hidden"); $("#adminLogin").classList.remove("hidden"); $("#adminResults").innerHTML = "";
+};
+// 確認ダイアログを使わず「もう一度押して確定」方式（ダイアログが出せない環境でも動くように）
+function confirmTwice(btn, askText, action){
+  const orig = btn.textContent; let armed = false, timer;
+  btn.onclick = async () => {
+    if (!armed) { armed = true; btn.textContent = askText; timer = setTimeout(()=>{ armed = false; btn.textContent = orig }, 4000); return }
+    clearTimeout(timer); armed = false; btn.textContent = orig; btn.disabled = true;
+    try { await action(); await adminRefresh() } catch(e){ console.error(e); $("#pwErr").textContent = "" ; alertInline("操作に失敗しました（" + (e.code||e.message) + "）") }
+    btn.disabled = false;
+  };
+}
+function alertInline(msg){ $("#adminResults").insertAdjacentHTML("afterbegin", `<div class="card"><p style="color:var(--err)">${msg}</p></div>`) }
+confirmTwice($("#openBtn"), "もう一度押すと受付開始", () => store.setState({open:true}));
+confirmTwice($("#closeBtn"), "もう一度押すと締切", () => store.setState({open:false}));
+$("#reloadBtn").onclick = adminRefresh;
+$("#showRes").onchange = async e => { await store.setState({showResults:e.target.checked}); adminRefresh() };
+$("#demoSeedBtn").onclick = async () => { await store.seed(30); adminRefresh() };
+$("#demoClearBtn").onclick = async () => { await store.clear(); adminRefresh() };
+
+/* ---------- 起動 ---------- */
+if (DEMO) {
+  $("#demoBanner").classList.remove("hidden");
+  document.querySelectorAll(".demo-reset").forEach(b=>{ b.classList.remove("hidden"); b.onclick = async () => { await store.resetMe(); startVoting() } });
+}
+const DEMO_TEXT = $("#demoBanner").textContent;
+// 管理者画面と投票画面は、ページを読み込み直さずにその場で切り替える
+// （プレビュー表示など、URLの付け替えが効かない環境でも動くように）
+async function startAdmin(){
+  show("pAdmin");
+  if (DEMO) $("#demoBanner").textContent = "デモモード：管理者パスワードは「" + DEMO_PASSWORD + "」です（本番ではFirebaseに登録したパスワードを使います）";
+  $("#foot").innerHTML = `<a href="#" id="toVote">投票ページに戻る</a>`;
+  $("#toVote").onclick = e => { e.preventDefault(); startVoting() };
+  try { if (await store.adminCurrent()) return openAdminPanel() } catch(e){ console.error(e) }
+  $("#pw").focus();
+}
+async function startVoting(){
+  if (DEMO) $("#demoBanner").textContent = DEMO_TEXT;
+  $("#foot").innerHTML = `<a href="#" id="toAdmin" class="ghost-link">管理者画面</a>`;
+  $("#toAdmin").onclick = e => { e.preventDefault(); startAdmin() };
+  try {
+    const st = await store.getState();
+    if (!st || !st.open) return showClosed(st);
+    if (await store.hasVoted()) { $("#doneMsg").textContent = "このブラウザからはすでに投票済みです。投票結果をお楽しみに。"; return show("pDone") }
+    $("#doneMsg").textContent = "投票結果をお楽しみに。";
+    $("#submit").disabled = false;
+    show("p1");
+  } catch(e){ console.error(e); $("#loading").classList.remove("hidden"); $("#loading").textContent = "読み込みに失敗しました。時間をおいて再度お試しください。" }
+}
+if (isAdminPage) startAdmin(); else startVoting();
+</script>
+</body>
+</html>
